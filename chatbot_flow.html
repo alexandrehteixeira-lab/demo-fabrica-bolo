@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fluxo de Automação - Chatbot Fábrica de Bolos</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #fff5f5 0%, #ffe6e6 100%);
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            background: linear-gradient(135deg, #ff6b6b, #ff8e8e);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(255, 107, 107, 0.3);
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.95;
+        }
+        
+        .flow-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
+            margin-top: 30px;
+        }
+        
+        .flow-step {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            border-left: 5px solid #ff6b6b;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .flow-step:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+        }
+        
+        .flow-step::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #ff6b6b, #ff8e8e);
+            border-radius: 0 15px 0 100%;
+            opacity: 0.1;
+        }
+        
+        .step-number {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #ff6b6b, #ff8e8e);
+            color: white;
+            border-radius: 50%;
+            font-weight: bold;
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 10px rgba(255, 107, 107, 0.3);
+        }
+        
+        .step-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 15px;
+        }
+        
+        .step-content {
+            color: #555;
+            margin-bottom: 15px;
+        }
+        
+        .messages {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 10px 0;
+        }
+        
+        .message-bot {
+            background: #e3f2fd;
+            border-left: 3px solid #2196f3;
+            padding: 10px;
+            margin: 8px 0;
+            border-radius: 5px;
+            font-style: italic;
+        }
+        
+        .message-user {
+            background: #f3e5f5;
+            border-left: 3px solid #9c27b0;
+            padding: 10px;
+            margin: 8px 0;
+            border-radius: 5px;
+        }
+        
+        .options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
+        }
+        
+        .option {
+            background: #ff6b6b;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .option:hover {
+            background: #ff5252;
+            transform: scale(1.05);
+        }
+        
+        .arrow {
+            text-align: center;
+            font-size: 2rem;
+            color: #ff6b6b;
+            margin: 20px 0;
+            animation: bounce 2s infinite;
+        }
+        
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {
+                transform: translateY(0);
+            }
+            40% {
+                transform: translateY(-10px);
+            }
+            60% {
+                transform: translateY(-5px);
+            }
+        }
+        
+        .info-box {
+            background: linear-gradient(135deg, #4CAF50, #66BB6A);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            box-shadow: 0 6px 20px rgba(76, 175, 80, 0.3);
+        }
+        
+        .warning-box {
+            background: linear-gradient(135deg, #FF9800, #FFB74D);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            box-shadow: 0 6px 20px rgba(255, 152, 0, 0.3);
+        }
+        
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+        
+        .feature {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            border-top: 4px solid #ff6b6b;
+        }
+        
+        .tech-stack {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin: 30px 0;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+        }
+        
+        .tech-stack h3 {
+            margin-bottom: 15px;
+            font-size: 1.5rem;
+        }
+        
+        .tech-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        
+        .tech-item {
+            background: rgba(255,255,255,0.1);
+            padding: 10px;
+            border-radius: 8px;
+            backdrop-filter: blur(10px);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🍰 Fluxo de Automação - Chatbot WhatsApp</h1>
+            <p>Fábrica de Bolos Caseiros - Sistema de Pré-Atendimento e Reservas</p>
+        </div>
+        
+        <div class="flow-container">
+            <div class="flow-step">
+                <div class="step-number">1</div>
+                <div class="step-title">🎯 Boas-vindas e Identificação</div>
+                <div class="step-content">
+                    <div class="messages">
+                        <div class="message-bot">
+                            🍰 Olá! Bem-vindo à Doce Sabor! Sou a Maya, sua assistente virtual.<br><br>
+                            Estou aqui para ajudar você a encontrar o bolo perfeito para sua ocasião especial! 
+                        </div>
+                        <div class="message-bot">
+                            Para começar, como posso te chamar?
+                        </div>
+                        <div class="message-user">
+                            [Cliente digita o nome]
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="arrow">↓</div>
+
+            <div class="flow-step">
+                <div class="step-number">2</div>
+                <div class="step-title">🎂 Menu Principal</div>
+                <div class="step-content">
+                    <div class="messages">
+                        <div class="message-bot">
+                            Prazer, [Nome]! 😊<br><br>
+                            O que você gostaria de fazer hoje?
+                        </div>
+                    </div>
+                    <div class="options">
+                        <button class="option">🍰 Ver Catálogo</button>
+                        <button class="option">📱 Fazer Pedido</button>
+                        <button class="option">📞 Falar com Atendente</button>
+                        <button class="option">📍 Localização</button>
+                        <button class="option">⏰ Horário de Funcionamento</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="arrow">↓</div>
+
+            <div class="flow-step">
+                <div class="step-number">3</div>
+                <div class="step-title">🛍️ Seleção de Categoria</div>
+                <div class="step-content">
+                    <div class="messages">
+                        <div class="message-bot">
+                            Perfeito! Que tipo de bolo você está procurando?
+                        </div>
+                    </div>
+                    <div class="options">
+                        <button class="option">🎂 Aniversário</button>
+                        <button class="option">💒 Casamento</button>
+                        <button class="option">👶 Chá de Bebê</button>
+                        <button class="option">🎓 Formatura</button>
+                        <button class="option">🍰 Tradicional</button>
+                        <button class="option">🧁 Cupcakes</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="arrow">↓</div>
+
+            <div class="flow-step">
+                <div class="step-number">4</div>
+                <div class="step-title">🍰 Apresentação dos Sabores</div>
+                <div class="step-content">
+                    <div class="messages">
+                        <div class="message-bot">
+                            Ótima escolha! Aqui estão nossos sabores disponíveis para [Categoria]:<br><br>
+                            🍫 Chocolate com Morango - R$ 45,00<br>
+                            🍋 Limão Siciliano - R$ 40,00<br>
+                            🥕 Cenoura com Cobertura - R$ 42,00<br>
+                            🍓 Red Velvet - R$ 48,00<br>
+                            🥥 Coco Gelado - R$ 44,00
+                        </div>
+                        <div class="message-bot">
+                            Qual sabor desperta seu interesse?
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="arrow">↓</div>
+
+            <div class="flow-step">
+                <div class="step-number">5</div>
+                <div class="step-title">📏 Personalização do Pedido</div>
+                <div class="step-content">
+                    <div class="messages">
+                        <div class="message-bot">
+                            Excelente escolha! Agora vamos personalizar seu bolo:<br><br>
+                            📏 Qual tamanho você precisa?
+                        </div>
+                    </div>
+                    <div class="options">
+                        <button class="option">👫 Pequeno (6-8 pessoas)</button>
+                        <button class="option">👨‍👩‍👧‍👦 Médio (10-15 pessoas)</button>
+                        <button class="option">🎉 Grande (20-25 pessoas)</button>
+                        <button class="option">🎪 Extra Grande (30+ pessoas)</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="arrow">↓</div>
+
+            <div class="flow-step">
+                <div class="step-number">6</div>
+                <div class="step-title">📝 Detalhes Adicionais</div>
+                <div class="step-content">
+                    <div class="messages">
+                        <div class="message-bot">
+                            Perfeito! Mais algumas informações:<br><br>
+                            📅 Para quando você precisa do bolo?<br>
+                            (Mínimo 48h de antecedência)
+                        </div>
+                        <div class="message-user">
+                            [Cliente informa a data]
+                        </div>
+                        <div class="message-bot">
+                            Gostaria de alguma personalização especial?<br>
+                            • Mensagem escrita<br>
+                            • Decoração temática<br>
+                            • Velas especiais
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="arrow">↓</div>
+
+            <div class="flow-step">
+                <div class="step-number">7</div>
+                <div class="step-title">📋 Resumo e Confirmação</div>
+                <div class="step-content">
+                    <div class="messages">
+                        <div class="message-bot">
+                            📋 Resumo do seu pedido:<br><br>
+                            🍰 Sabor: [Sabor escolhido]<br>
+                            📏 Tamanho: [Tamanho]<br>
+                            📅 Data: [Data solicitada]<br>
+                            💰 Valor: R$ XX,XX<br>
+                            ➕ Personalizações: [Se houver]<br><br>
+                            Está tudo correto?
+                        </div>
+                    </div>
+                    <div class="options">
+                        <button class="option">✅ Confirmar</button>
+                        <button class="option">✏️ Alterar</button>
+                        <button class="option">❌ Cancelar</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="arrow">↓</div>
+
+            <div class="flow-step">
+                <div class="step-number">8</div>
+                <div class="step-title">📞 Dados de Contato</div>
+                <div class="step-content">
+                    <div class="messages">
+                        <div class="message-bot">
+                            Ótimo! Para finalizar, preciso de alguns dados:<br><br>
+                            📱 Confirme seu WhatsApp: [número atual]<br>
+                            📧 E-mail (opcional):<br>
+                            📍 Endereço para entrega (se necessário):
+                        </div>
+                        <div class="message-user">
+                            [Cliente fornece informações]
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="arrow">↓</div>
+
+            <div class="flow-step">
+                <div class="step-number">9</div>
+                <div class="step-title">✅ Confirmação Final</div>
+                <div class="step-content">
+                    <div class="messages">
+                        <div class="message-bot">
+                            🎉 Pedido confirmado com sucesso!<br><br>
+                            📋 Número do pedido: #BOL001<br>
+                            💳 Forma de pagamento: A combinar na entrega<br>
+                            📅 Data de entrega: [Data]<br>
+                            ⏰ Horário estimado: [Horário]<br><br>
+                            Em breve nossa equipe entrará em contato para confirmar os detalhes finais e forma de pagamento.<br><br>
+                            Obrigada pela preferência! 😊
+                        </div>
+                    </div>
+                    <div class="options">
+                        <button class="option">🏠 Menu Principal</button>
+                        <button class="option">📱 Novo Pedido</button>
+                        <button class="option">📞 Falar com Atendente</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="info-box">
+            <h3>💡 Funcionalidades Extras do Chatbot</h3>
+            <div class="features">
+                <div class="feature">
+                    <h4>🤖 Respostas Inteligentes</h4>
+                    <p>Reconhece perguntas sobre ingredientes, valores, prazos e responde automaticamente</p>
+                </div>
+                <div class="feature">
+                    <h4>📅 Gestão de Agenda</h4>
+                    <p>Verifica disponibilidade de datas e sugere alternativas quando necessário</p>
+                </div>
+                <div class="feature">
+                    <h4>🔄 Transferência Humana</h4>
+                    <p>Encaminha para atendente real quando necessário ou solicitado</p>
+                </div>
+                <div class="feature">
+                    <h4>💾 Histórico de Pedidos</h4>
+                    <p>Salva preferências do cliente para facilitar pedidos futuros</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="warning-box">
+            <h3>⚠️ Pontos Importantes para Implementação</h3>
+            <ul>
+                <li>Configurar horário de funcionamento do bot (ex: 8h às 18h)</li>
+                <li>Definir mensagem de ausência fora do horário</li>
+                <li>Integrar com sistema de gestão de pedidos</li>
+                <li>Configurar backup para atendente humano</li>
+                <li>Implementar validação de dados (datas, formatos)</li>
+                <li>Criar base de conhecimento com perguntas frequentes</li>
+            </ul>
+        </div>
+
+        <div class="tech-stack">
+            <h3>🔧 Tecnologias Sugeridas</h3>
+            <div class="tech-list">
+                <div class="tech-item">
+                    <strong>WhatsApp Business API</strong><br>
+                    Integração oficial do WhatsApp
+                </div>
+                <div class="tech-item">
+                    <strong>Botpress / Dialogflow</strong><br>
+                    Plataforma de desenvolvimento de chatbot
+                </div>
+                <div class="tech-item">
+                    <strong>Webhook</strong><br>
+                    Comunicação em tempo real
+                </div>
+                <div class="tech-item">
+                    <strong>Base de Dados</strong><br>
+                    MySQL/PostgreSQL para pedidos
+                </div>
+                <div class="tech-item">
+                    <strong>Zapier / Make</strong><br>
+                    Automações e integrações
+                </div>
+                <div class="tech-item">
+                    <strong>Google Sheets</strong><br>
+                    Gestão simples de pedidos
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Adiciona interatividade aos botões
+        document.querySelectorAll('.option').forEach(button => {
+            button.addEventListener('click', function() {
+                this.style.background = '#4CAF50';
+                this.innerHTML = '✓ ' + this.innerHTML;
+                setTimeout(() => {
+                    this.style.background = '#ff6b6b';
+                    this.innerHTML = this.innerHTML.replace('✓ ', '');
+                }, 1500);
+            });
+        });
+
+        // Animação suave ao rolar
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver(function(entries) {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.flow-step').forEach(step => {
+            step.style.opacity = '0';
+            step.style.transform = 'translateY(30px)';
+            step.style.transition = 'all 0.6s ease';
+            observer.observe(step);
+        });
+    </script>
+</body>
+</html>
